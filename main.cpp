@@ -1,64 +1,91 @@
-#define _CRT_SECURE_NO_WARNINGS_
 #include <iostream>
 #include <cstring>
-#include <stdexcept>
 
+int32_t partitionHoare(int32_t*, int32_t, int32_t);
+void quicksortHoare(int32_t*, int32_t, int32_t);
+int32_t countSum(int32_t*, int32_t);
 
-struct Entry {
-    std::string original;
-    int32_t key;
-};
-
-int32_t extract_key(const std::string& line) {
-    size_t last_space = line.rfind(' ');
-    if (last_space == std::string::npos) {
-        throw std::invalid_argument("Invalid line format");
-    }
-    return std::stoi(line.substr(last_space + 1));
-}
 
 int main(){
-    Entry* entries {nullptr};
-    int32_t capacity {};
-    int32_t size {};
- 
-    std::string line;
-    std::cout << "enter u strings: \n";
-    while (std::getline(std::cin, line)) {
-        if (line.empty()) break;
+    int32_t size{};
+    std::cout << "enter max size of strings: \n";
+    std::cin >> size;
+    std::cin.ignore();
 
-        int32_t key = extract_key(line);
-
-        if (size >= capacity) {
-            int32_t new_capacity = (capacity == 0) ? 2 : capacity * 2;
-            Entry* new_entries = new Entry[new_capacity];
-            for (int32_t i = 0; i < size; i++) {
-                new_entries[i] = entries[i];
-            }
-            delete[] entries;
-            entries = new_entries;
-            capacity = new_capacity;
-        }
-
-        entries[size].original = line;
-        entries[size].key = key;
-        ++size;
+    char** mix_mtr = new char* [size];
+    for (int32_t i{}; i < size ; ++i){
+        mix_mtr[i] = new char[300];
+        std::cout << "enter string number " << i + 1 << '\n';
+        std::cin.getline(mix_mtr[i], 300);
     }
 
-    for (int32_t i = 1; i < size; ++i) {
-        Entry current = entries[i];
-        int32_t j = i - 1;
-        while (j >= 0 && entries[j].key > current.key) {
-            entries[j + 1] = entries[j];
-            j--;
-        }
-        entries[j + 1] = current;
+    /* find num*/
+    int32_t* numbers = new int32_t[size];
+    for(int32_t i{}; i < size ; ++i){
+        char* space_ptr = strchr(mix_mtr[i], ' ');
+        char* num_ptr = space_ptr + 1;
+        numbers[i] = atoi(num_ptr);
     }
 
-    for (int32_t i = 0; i < size; ++i) {
-        std::cout <<entries[i].original << '\n';
+    for(int32_t i {}; i < size ; ++i){
+        std::cout << mix_mtr[i] << '\n';
     }
 
-    delete[] entries;
+    quicksortHoare(numbers, 0, size - 1);
+    std::cout << "numbers after using quicksort: \n";
+      for(int32_t i {}; i < size ; ++i){
+        std::cout << numbers[i] << '\n';
+    }
+
+
+    std::cout << "sum of numbers is: \t" << countSum(numbers, size) << '\n';
+
+    std::cout << "max num is: \t" << numbers[size - 1] << '\n'; 
+    std::cout << "min num is: \t" << numbers[0]; 
+
+    for(int32_t i{}; i < size ; ++i){
+        delete[] mix_mtr[i];
+    }
+    delete[] mix_mtr;
+
     return 0;
+}
+
+int32_t partitionHoare(int32_t* numbers, int32_t low, int32_t high){
+    int32_t pivot = numbers[low + (high - low) / 2];
+    int32_t i = low - 1;
+    int32_t j = high + 1;
+
+    while(true){
+
+        do {
+            ++i;
+        } while (numbers[i] < pivot);
+
+        do {
+            --j;
+        }while(numbers[j] > pivot);
+
+        if ( i >= j){
+            return j;
+        }
+
+        std::swap(numbers[i], numbers[j]);
+    }
+}
+
+void quicksortHoare(int32_t* numbers, int32_t low, int32_t high){
+    if (low < high){
+        int32_t piv = partitionHoare(numbers, low, high);
+        quicksortHoare(numbers, low, piv);
+        quicksortHoare(numbers, piv + 1, high);
+    }
+}
+
+int32_t countSum(int32_t* numbers, int32_t size){
+    int32_t sum {};
+    for(int32_t i{}; i < size; ++i){
+        sum += numbers[i];
+    }
+    return sum;
 }
